@@ -1,4 +1,4 @@
-version: '3.8'
+name: kazabuild
 
 services:
   api:
@@ -13,12 +13,20 @@ services:
       rabbitmq:
         condition: service_started
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - PORT=5000
+      - ConnectionStrings__DefaultConnection=Server=mssql,1433;Database=kazabuild_db;User Id=sa;Password=YourStrong!Passw0rd123;TrustServerCertificate=True;Encrypt=False;
       - DB_HOST=mssql
+      - DB_PORT=1433
       - DB_NAME=kazabuild_db
+      - DB_USER=sa
       - DB_PASS=YourStrong!Passw0rd123
       - RABBITMQ__HOST=rabbitmq
-      - PORT=5000 
+      - RabbitMQ__messaging__HostName=rabbitmq
+      - Frontend__AllowedFrontendOrigins__0=http://localhost:3000
+      - Frontend__AllowedFrontendOrigins__1=http://localhost:5001
+      - Frontend__AllowedFrontendOrigins__2=https://localhost:5001
     networks:
       - backend_network
       - app_network
@@ -27,6 +35,8 @@ services:
     build:
       context: ./mssql
       dockerfile: Dockerfile
+    ports:
+      - "1433:1433"
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=YourStrong!Passw0rd123
@@ -35,14 +45,24 @@ services:
     networks:
       - backend_network
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - railway_rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend_network
+
   frontend-web:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - API_BASE_URL=https://<YOUR-API-URL>.up.railway.app
+        - API_BASE_URL=http://localhost:5000
     ports:
-      - "80:80"
+      - "3000:80"
     networks:
       - app_network
 
