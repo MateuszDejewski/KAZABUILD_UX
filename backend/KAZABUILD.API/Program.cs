@@ -220,7 +220,10 @@ namespace KAZABUILD.API
                 if (!app.Environment.IsEnvironment("Testing"))
                 {
                     Console.WriteLine("Press any key to exit...");
-                    Console.ReadKey();
+                    if (!Console.IsInputRedirected)
+                    {
+                        Console.ReadKey();
+                    }
                 }
                 return;
             }
@@ -243,7 +246,10 @@ namespace KAZABUILD.API
 
                 //Close the app upon a button press
                 Console.WriteLine("Press any button to close...");
-                Console.ReadKey();
+                if (!Console.IsInputRedirected)
+                {
+                    Console.ReadKey();
+                }
                 return;
             }
         }
